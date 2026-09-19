@@ -1,4 +1,5 @@
 """VaaniStock — FastAPI Main Application"""
+import re
 import logging
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,6 +15,15 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
 logger = logging.getLogger(__name__)
+
+
+def is_allowed_origin(origin: str) -> bool:
+    if origin in settings.CORS_ORIGINS:
+        return True
+    # Allow all Vercel preview deployments
+    if re.match(r'https://.*\.vercel\.app$', origin):
+        return True
+    return False
 
 
 @asynccontextmanager
@@ -42,6 +52,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=r'https://.*\.vercel\.app$',
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
