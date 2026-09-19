@@ -1,0 +1,119 @@
+{
+  "app": {
+    "name": "VaaniStock",
+    "tagline": "Manage Your Stock. Just Speak."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "inventory": "Inventory",
+    "addProduct": "Add Product",
+    "transactions": "Transactions",
+    "alerts": "Alerts",
+    "reports": "Reports",
+    "voice": "Voice Assistant",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "greeting": "Good",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "totalProducts": "Total Products",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock",
+    "todayIn": "Today's Stock In",
+    "todayOut": "Today's Stock Out",
+    "inventoryValue": "Inventory Value",
+    "recentActivity": "Recent Activity",
+    "lowStockAlerts": "Low Stock Alerts",
+    "speakToManage": "Tap to Speak",
+    "voiceAssistant": "Voice Assistant"
+  },
+  "voice": {
+    "idle": "Tap to Speak",
+    "listening": "Listening...",
+    "processing": "Understanding your command...",
+    "noSupport": "Voice recognition is unavailable in this browser.",
+    "manualEntry": "Enter Command Manually",
+    "demoMode": "Demo Voice Parser Active",
+    "confirm": "Confirm Stock Update",
+    "action": "Action",
+    "product": "Product",
+    "quantity": "Quantity",
+    "currentStock": "Current Stock",
+    "newStock": "After Update",
+    "edit": "Edit",
+    "confirm_btn": "Confirm",
+    "cancel": "Cancel",
+    "success": "Stock updated successfully!",
+    "placeholder": "e.g. Add 10 bags of rice"
+  },
+  "inventory": {
+    "title": "Inventory",
+    "search": "Search products...",
+    "addProduct": "Add Product",
+    "product": "Product",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "status": "Status",
+    "threshold": "Threshold",
+    "lastUpdated": "Last Updated",
+    "actions": "Actions",
+    "stockIn": "Stock In",
+    "stockOut": "Stock Out",
+    "edit": "Edit",
+    "delete": "Delete",
+    "noProducts": "No products found",
+    "addFirst": "Add your first product to get started"
+  },
+  "status": {
+    "healthy": "Healthy",
+    "lowStock": "Low Stock",
+    "outOfStock": "Out of Stock"
+  },
+  "alerts": {
+    "title": "Stock Alerts",
+    "noAlerts": "All products are well-stocked!",
+    "lowStockWarning": "Low Stock Warning",
+    "outOfStockCritical": "Out of Stock",
+    "reorderSuggested": "Recommended Reorder",
+    "threshold": "Threshold",
+    "remaining": "remaining"
+  },
+  "transactions": {
+    "title": "Transaction History",
+    "export": "Export CSV",
+    "stockIn": "Stock In",
+    "stockOut": "Stock Out",
+    "source": "Source",
+    "previous": "Previous",
+    "new": "New",
+    "date": "Date",
+    "noTransactions": "No transactions yet"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "name": "Your Name",
+    "businessName": "Business Name",
+    "preferredLanguage": "Preferred Language",
+    "loginBtn": "Login",
+    "registerBtn": "Create Account",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "signUp": "Sign Up",
+    "signIn": "Sign In"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalidEmail": "Enter a valid email address",
+    "minPassword": "Password must be at least 6 characters",
+    "insufficientStock": "Insufficient stock",
+    "productNotFound": "Product not found",
+    "networkError": "Network error. Please check your connection.",
+    "generic": "Something went wrong. Please try again."
+  }
+}
