@@ -176,6 +176,7 @@ class InventoryService:
             prev_qty=qty,
             new_qty=0,
             request_id=request_id,
+            operation="DELETE_PRODUCT",
         )
 
         self.products.delete_one({"_id": ObjectId(product_id), "userId": self.user_id})
@@ -229,6 +230,7 @@ class InventoryService:
             prev_qty=0,
             new_qty=quantity,
             request_id=request_id,
+            operation="CREATE_PRODUCT",
         )
 
         return {
@@ -384,7 +386,7 @@ class InventoryService:
 
     def _create_transaction(
         self, product_id, product_name, action, quantity, unit,
-        source, transcript, prev_qty, new_qty, request_id=None
+        source, transcript, prev_qty, new_qty, request_id=None, operation=None
     ) -> dict:
         now = datetime.now(timezone.utc)
         txn = {
@@ -392,6 +394,7 @@ class InventoryService:
             "productId": ObjectId(product_id),
             "productName": product_name,
             "action": action,
+            "operation": operation or action,
             "quantity": quantity,
             "unit": unit,
             "source": source,

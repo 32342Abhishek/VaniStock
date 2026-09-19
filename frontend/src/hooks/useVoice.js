@@ -201,6 +201,7 @@ export function useVoice({ defaultLanguage = 'en', onConfirmed, onNavigate } = {
   }, [executeQuery, onNavigate, selectedLanguage])
 
   const cancel = useCallback(() => {
+    const wasDeleteConfirmation = state === VOICE_STATES.CONFIRMATION && parsed?.intent === 'DELETE_PRODUCT'
     abortRef.current = true
     voiceService.abort()
     voiceService.cancelSpeech()
@@ -208,7 +209,12 @@ export function useVoice({ defaultLanguage = 'en', onConfirmed, onNavigate } = {
     setError(null)
     setTranscript('')
     setParsed(null)
-  }, [])
+    if (wasDeleteConfirmation) {
+      const message = 'Okay, I cancelled the deletion.'
+      setResponseMessage(message)
+      voiceService.speak(message, speechLangTag)
+    }
+  }, [parsed, speechLangTag, state])
 
   const reset = useCallback(() => {
     if (state !== VOICE_STATES.LISTENING && state !== VOICE_STATES.PROCESSING) {

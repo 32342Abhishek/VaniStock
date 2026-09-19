@@ -165,7 +165,11 @@ async def confirm_voice_command(
         vc_col = get_collection("voice_commands")
         vc_col.update_one(
             {"_id": ObjectId(body.commandId)},
-            {"$set": {"status": "CONFIRMED"}}
+            {"$set": {
+                "status": "CONFIRMED",
+                "result": result["message"],
+                "completedAt": datetime.now(timezone.utc),
+            }}
         )
 
     return {
