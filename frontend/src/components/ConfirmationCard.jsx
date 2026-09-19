@@ -4,7 +4,7 @@ import { Check, X, Edit3, AlertTriangle, Info, Mic } from 'lucide-react'
 import { clsx } from 'clsx'
 import { ALL_UNITS } from '../utils/unitNormalizer'
 
-export default function ConfirmationCard({ parsed, product, transcript, commandId, onConfirm, onCancel, onEdit: _onEdit }) {
+export default function ConfirmationCard({ parsed, product, transcript, commandId, onConfirm, onCancel, onVoiceConfirm, onEdit: _onEdit }) {
   const [editing, setEditing] = useState(false)
   const [editQty, setEditQty] = useState(parsed?.quantity || '')
   const [editUnit, setEditUnit] = useState(parsed?.unit || '')
@@ -28,12 +28,16 @@ export default function ConfirmationCard({ parsed, product, transcript, commandI
 
   const handleConfirm = () => {
     if (isDeleteProduct) {
+      const deleteData = {
+        commandId,
+        transcript,
+        intent: parsed.intent,
+        productName: parsed.productName || product?.name,
+        productId: product?.id || null,
+        language: parsed.language,
+      }
         onConfirm({
-            commandId,
-            transcript,
-            intent: parsed.intent,
-            productName: parsed.productName || product?.name,
-            productId: product?.id || null, // Optional for delete
+        ...deleteData,
             confirmed: true
         })
         return
@@ -196,6 +200,18 @@ export default function ConfirmationCard({ parsed, product, transcript, commandI
         <button onClick={onCancel} className="btn-danger flex-1 text-sm">
           Cancel
         </button>
+        {isDeleteProduct && onVoiceConfirm && (
+          <button onClick={() => onVoiceConfirm({
+            commandId,
+            transcript,
+            intent: parsed.intent,
+            productName: parsed.productName || product?.name,
+            productId: product?.id || null,
+            language: parsed.language,
+          })} className="btn-secondary flex-1 text-sm">
+            <Mic size={15} /> Say Yes/No
+          </button>
+        )}
         <button
           onClick={handleConfirm}
           disabled={!isDeleteProduct && (!product && !isCreateProduct || !parsed?.quantity)}

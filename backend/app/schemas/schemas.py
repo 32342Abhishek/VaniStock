@@ -159,6 +159,7 @@ class VoiceConfirmRequest(BaseModel):
     unit: Optional[str] = None               # Optional for DELETE_PRODUCT
     requestId: Optional[str] = None
     confirmed: bool = False                  # For delete confirmation: False = ask, True = execute
+    language: Optional[str] = None
     source: TransactionSource = TransactionSource.VOICE
 
 

@@ -151,6 +151,28 @@ export function useVoice({ defaultLanguage = 'en', onConfirmed, onNavigate } = {
     }
   }, [onConfirmed, speechLangTag])
 
+  const confirmDeleteByVoice = useCallback(async (confirmData) => {
+    setError(null)
+    setState(VOICE_STATES.LISTENING)
+    try {
+      const answer = (await voiceService.listen(speechLangTag)).trim().toLowerCase()
+      if (/^(yes|y|haan|ha|हां|हाँ|అవును)\b/.test(answer)) {
+        await confirmCommand({ ...confirmData, confirmed: true })
+      } else if (/^(no|n|cancel|नहीं|नही|వద్దు)\b/.test(answer)) {
+        const message = 'Okay, I cancelled the deletion.'
+        setResponseMessage(message)
+        setState(VOICE_STATES.SUCCESS)
+        voiceService.speak(message, speechLangTag)
+        setTimeout(() => setState(VOICE_STATES.IDLE), 3000)
+      } else {
+        throw new Error('Please say yes to delete or no to cancel.')
+      }
+    } catch (err) {
+      setError(err.message)
+      setState(VOICE_STATES.ERROR)
+    }
+  }, [confirmCommand, speechLangTag])
+
   const submitManualCommand = useCallback(async (text) => {
     if (!text.trim()) return
     setTranscript(text)
@@ -215,6 +237,7 @@ export function useVoice({ defaultLanguage = 'en', onConfirmed, onNavigate } = {
     isSpeaking,
     startListening,
     confirmCommand,
+    confirmDeleteByVoice,
     submitManualCommand,
     cancel,
     reset,

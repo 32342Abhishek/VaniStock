@@ -3,6 +3,7 @@
 export class VoiceService {
   constructor() {
     this.recognition = null
+    this.microphoneStream = null
     this.synthesis = window.speechSynthesis || null
     this.isSpeaking = false
     this.onSpeakingChange = null
@@ -44,7 +45,7 @@ export class VoiceService {
 
     // Request mic permission before creating the recognition session.
     try {
-      await navigator.mediaDevices.getUserMedia({ audio: true })
+      this.microphoneStream = await navigator.mediaDevices.getUserMedia({ audio: true })
     } catch {
       throw new Error('Microphone permission was denied. Please allow microphone access in your browser settings.')
     }
@@ -85,12 +86,14 @@ export class VoiceService {
 
       this.recognition.onend = () => {
         if (silenceTimer) clearTimeout(silenceTimer)
+        this._releaseMicrophone()
         this.recognition = null
         resolve(finalTranscript.trim())
       }
 
       this.recognition.onerror = (event) => {
         if (silenceTimer) clearTimeout(silenceTimer)
+        this._releaseMicrophone()
         this.recognition = null
         switch (event.error) {
           case 'not-allowed':
@@ -117,9 +120,18 @@ export class VoiceService {
       try {
         this.recognition.start()
       } catch {
+        this._releaseMicrophone()
+        this.recognition = null
         reject(new Error('Failed to start voice recognition. Please refresh the page.'))
       }
     })
+  }
+
+  _releaseMicrophone() {
+    if (this.microphoneStream) {
+      this.microphoneStream.getTracks().forEach((track) => track.stop())
+      this.microphoneStream = null
+    }
   }
 
   stop() {

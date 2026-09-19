@@ -459,7 +459,7 @@ Rules:
                 clarificationMessage=data.get("clarificationMessage"),
             )
         except Exception as e:
-            logger.error(f"Gemini parsing error ({type(e).__name__}): {e}")
+            logger.error("Gemini parsing failed; using rule-based fallback (%s)", type(e).__name__)
             # Fall back to rule-based — never crash the app
             fallback = RuleBasedProvider()
             return await fallback.parse_inventory_command(text, language)
@@ -482,7 +482,7 @@ def get_ai_provider() -> AIProvider:
     api_key = settings.AI_API_KEY
 
     if provider in ("google", "gemini"):
-        if api_key and api_key.startswith("AIza"):
+        if api_key and api_key.strip():
             try:
                 model = settings.AI_MODEL or "gemini-1.5-flash"
                 return GeminiProvider(api_key=api_key, model=model)
@@ -491,15 +491,8 @@ def get_ai_provider() -> AIProvider:
                     f"Failed to initialize Gemini ({type(e).__name__}). "
                     "Using rule-based fallback."
                 )
-        elif api_key:
-            logger.warning(
-                "AI_API_KEY does not appear to be a valid Gemini API key "
-                "(Gemini keys start with 'AIza'). "
-                "Using rule-based fallback. "
-                "Get a valid key at https://aistudio.google.com/apikey"
-            )
         else:
-            logger.info("No AI_API_KEY set. Using rule-based parser (Demo Mode).")
+            logger.warning("AI_PROVIDER=%s but AI_API_KEY is not configured; using rule-based fallback.", provider)
 
     return RuleBasedProvider()
 
