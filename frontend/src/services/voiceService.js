@@ -98,7 +98,7 @@ export class VoiceService {
         switch (event.error) {
           case 'not-allowed':
           case 'permission-denied':
-            reject(new Error('Microphone blocked. Click the mic icon in your browser address bar to allow access.'))
+            reject(new Error('Microphone permission was denied. Please allow microphone access in your browser settings.'))
             break
           case 'no-speech':
             reject(new Error('No speech detected. Please speak clearly and try again.'))

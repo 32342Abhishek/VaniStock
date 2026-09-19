@@ -23,6 +23,7 @@ export function useVoice({ defaultLanguage = 'en', onConfirmed, onNavigate } = {
   const [selectedLanguage, setSelectedLanguage] = useState(defaultLanguage)
   const [responseMessage, setResponseMessage] = useState(null)
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [commandId, setCommandId] = useState(null)
   const abortRef = useRef(false)
   
   useEffect(() => {
@@ -32,6 +33,23 @@ export function useVoice({ defaultLanguage = 'en', onConfirmed, onNavigate } = {
 
   const langTag = { auto: null, en: 'en-IN', hi: 'hi-IN', te: 'te-IN' }[selectedLanguage] ?? 'en-IN'
   const speechLangTag = langTag || navigator.language || 'en-IN'
+
+  const speakConfirmation = useCallback((parsedData, productData) => {
+    const productName = parsedData?.productName || productData?.name || 'this product'
+    let message = `I heard ${productName}`
+    if (parsedData?.quantity) message += `, ${parsedData.quantity} ${parsedData.unit || productData?.unit || 'units'}`
+    if (parsedData?.intent === 'DELETE_PRODUCT') {
+      message = `Are you sure you want to permanently delete ${productName}? Please say yes or no.`
+    } else if (parsedData?.intent === 'ADD_STOCK') {
+      message += '. Should I add it to your inventory? Please say yes or no.'
+    } else if (parsedData?.intent === 'REMOVE_STOCK') {
+      message += '. Should I remove it from your inventory? Please say yes or no.'
+    } else if (parsedData?.intent === 'CREATE_PRODUCT') {
+      message += '. Should I create this product? Please say yes or no.'
+    }
+    setResponseMessage(message)
+    voiceService.speak(message, speechLangTag)
+  }, [speechLangTag])
 
   const executeQuery = useCallback(async (queryText, intent, productName, lang) => {
     setState(VOICE_STATES.PROCESSING)
@@ -97,7 +115,8 @@ export function useVoice({ defaultLanguage = 'en', onConfirmed, onNavigate } = {
 
     try {
       const res = await voiceAPI.parse(finalText, selectedLanguage)
-      const { parsed: parsedData, product: productData, isDemoMode: demo } = res.data.data
+      const { commandId: parsedCommandId, parsed: parsedData, product: productData, isDemoMode: demo } = res.data.data
+      setCommandId(parsedCommandId)
       setParsed(parsedData)
       setProduct(productData)
       setIsDemoMode(!!demo)
@@ -112,12 +131,13 @@ export function useVoice({ defaultLanguage = 'en', onConfirmed, onNavigate } = {
         await executeQuery(finalText, intent, parsedData?.productName, parsedData?.language)
       } else {
         setState(VOICE_STATES.CONFIRMATION)
+        speakConfirmation(parsedData, productData)
       }
     } catch (err) {
       setError(err.response?.data?.detail?.message || 'Failed to process command')
       setState(VOICE_STATES.ERROR)
     }
-    }, [executeQuery, langTag, onNavigate, selectedLanguage])
+    }, [executeQuery, langTag, onNavigate, selectedLanguage, speakConfirmation])
 
   const confirmCommand = useCallback(async (confirmData) => {
     setState(VOICE_STATES.PROCESSING)
@@ -173,13 +193,36 @@ export function useVoice({ defaultLanguage = 'en', onConfirmed, onNavigate } = {
     }
   }, [confirmCommand, speechLangTag])
 
+  const confirmPendingByVoice = useCallback(async (confirmData) => {
+    setError(null)
+    setState(VOICE_STATES.LISTENING)
+    try {
+      const answer = (await voiceService.listen(speechLangTag)).trim().toLowerCase()
+      if (/^(yes|y|haan|ha|हां|हाँ|అవును)\b/.test(answer)) {
+        await confirmCommand({ ...confirmData, confirmed: true })
+      } else if (/^(no|n|cancel|नहीं|नही|వద్దు)\b/.test(answer)) {
+        const message = 'Okay, I cancelled that request.'
+        setResponseMessage(message)
+        setState(VOICE_STATES.SUCCESS)
+        voiceService.speak(message, speechLangTag)
+        setTimeout(() => setState(VOICE_STATES.IDLE), 3000)
+      } else {
+        throw new Error('Please say yes to confirm or no to cancel.')
+      }
+    } catch (err) {
+      setError(err.message)
+      setState(VOICE_STATES.ERROR)
+    }
+  }, [confirmCommand, speechLangTag])
+
   const submitManualCommand = useCallback(async (text) => {
     if (!text.trim()) return
     setTranscript(text)
     setState(VOICE_STATES.PROCESSING)
     try {
       const res = await voiceAPI.parse(text, selectedLanguage)
-      const { parsed: parsedData, product: productData, isDemoMode: demo } = res.data.data
+      const { commandId: parsedCommandId, parsed: parsedData, product: productData, isDemoMode: demo } = res.data.data
+      setCommandId(parsedCommandId)
       setParsed(parsedData)
       setProduct(productData)
       setIsDemoMode(!!demo)
@@ -193,12 +236,13 @@ export function useVoice({ defaultLanguage = 'en', onConfirmed, onNavigate } = {
         await executeQuery(text, intent, parsedData?.productName, parsedData?.language)
       } else {
         setState(VOICE_STATES.CONFIRMATION)
+        speakConfirmation(parsedData, productData)
       }
     } catch (err) {
       setError(err.response?.data?.detail?.message || 'Failed to process command')
       setState(VOICE_STATES.ERROR)
     }
-  }, [executeQuery, onNavigate, selectedLanguage])
+  }, [executeQuery, onNavigate, selectedLanguage, speakConfirmation])
 
   const cancel = useCallback(() => {
     const wasDeleteConfirmation = state === VOICE_STATES.CONFIRMATION && parsed?.intent === 'DELETE_PRODUCT'
@@ -209,6 +253,7 @@ export function useVoice({ defaultLanguage = 'en', onConfirmed, onNavigate } = {
     setError(null)
     setTranscript('')
     setParsed(null)
+    setCommandId(null)
     if (wasDeleteConfirmation) {
       const message = 'Okay, I cancelled the deletion.'
       setResponseMessage(message)
@@ -224,6 +269,7 @@ export function useVoice({ defaultLanguage = 'en', onConfirmed, onNavigate } = {
     setTranscript('')
     setParsed(null)
     setProduct(null)
+    setCommandId(null)
     setResponseMessage(null)
   }, [state])
 
@@ -244,6 +290,8 @@ export function useVoice({ defaultLanguage = 'en', onConfirmed, onNavigate } = {
     startListening,
     confirmCommand,
     confirmDeleteByVoice,
+    confirmPendingByVoice,
+    commandId,
     submitManualCommand,
     cancel,
     reset,

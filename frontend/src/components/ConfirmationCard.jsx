@@ -200,7 +200,7 @@ export default function ConfirmationCard({ parsed, product, transcript, commandI
         <button onClick={onCancel} className="btn-danger flex-1 text-sm">
           Cancel
         </button>
-        {isDeleteProduct && onVoiceConfirm && (
+        {onVoiceConfirm && (
           <button onClick={() => onVoiceConfirm({
             commandId,
             transcript,

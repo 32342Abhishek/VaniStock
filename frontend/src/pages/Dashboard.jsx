@@ -32,7 +32,7 @@ export default function Dashboard() {
   useEffect(() => { loadDashboard() }, [])
 
   const voice = useVoice({
-    language: user?.preferredLanguage || 'en',
+    defaultLanguage: user?.preferredLanguage || 'en',
     onConfirmed: () => { loadDashboard() }
   })
 
@@ -143,13 +143,14 @@ export default function Dashboard() {
         product={voice.product}
         error={voice.error}
         isDemoMode={voice.isDemoMode}
-        commandId={null}
+        commandId={voice.commandId}
         onStart={voice.startListening}
         onCancel={voice.cancel}
         onConfirm={(data) => {
           voice.confirmCommand({ ...data, requestId: crypto.randomUUID() })
           setTimeout(() => setVoiceOpen(false), 2000)
         }}
+        onVoiceConfirm={(data) => voice.confirmPendingByVoice({ ...data, requestId: crypto.randomUUID() })}
         onManualSubmit={voice.submitManualCommand}
       />
     </div>

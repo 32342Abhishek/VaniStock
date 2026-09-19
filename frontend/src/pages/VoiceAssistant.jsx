@@ -244,9 +244,9 @@ export default function VoiceAssistant() {
               parsed={voice.parsed}
               product={voice.product}
               transcript={voice.transcript}
-              commandId={null}
+              commandId={voice.commandId}
               onConfirm={handleConfirm}
-              onVoiceConfirm={voice.confirmDeleteByVoice}
+              onVoiceConfirm={voice.confirmPendingByVoice}
               onCancel={voice.cancel}
             />
           )}

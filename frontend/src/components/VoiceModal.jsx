@@ -16,7 +16,7 @@ function Waveform() {
   )
 }
 
-export default function VoiceModal({ open, onClose, voiceState, transcript, parsed, product, error, isDemoMode, commandId, onStart, onCancel, onConfirm, onManualSubmit }) {
+export default function VoiceModal({ open, onClose, voiceState, transcript, parsed, product, error, isDemoMode, commandId, onStart, onCancel, onConfirm, onVoiceConfirm, onManualSubmit }) {
   const [manualText, setManualText] = useState('')
   const [showManual, setShowManual] = useState(false)
 
@@ -54,6 +54,7 @@ export default function VoiceModal({ open, onClose, voiceState, transcript, pars
             transcript={transcript}
             commandId={commandId}
             onConfirm={onConfirm}
+            onVoiceConfirm={onVoiceConfirm}
             onCancel={onCancel}
             onEdit={() => {}}
           />
